@@ -1,4 +1,4 @@
-```markdown
+
 # LangGraph Multi-Agent Chat System
 
 A production-ready, full-stack AI application built with **LangGraph**, **FastAPI**, and **Next.js**.  

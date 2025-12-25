@@ -1,4 +1,3 @@
-
 # LangGraph Multi-Agent Chat System
 
 A production-ready, full-stack AI application built with **LangGraph**, **FastAPI**, and **Next.js**.  
@@ -37,6 +36,38 @@ The system orchestrates specialized **business**, **research**, and **technical*
 
 ---
 
+## Architecture & Workflow
+
+The system implements a **multi-agent orchestration pattern** with intelligent routing and synthesis capabilities.
+
+<p align="center">
+  <img src="./workflow-diagram.png" alt="LangGraph Multi-Agent Workflow Architecture" width="700"/>
+</p>
+
+### Workflow Steps
+
+1. **Start** → User submits a question via the Next.js frontend
+2. **Supervisor Agent** → Analyzes and classifies the question as:
+   - 🏢 **Business** (strategy, finance, marketing, management)
+   - 🔬 **Research** (academic, scientific, theoretical)
+   - 💻 **Technical** (programming, engineering, system design)
+3. **Domain Agent** → Specialized agent generates initial response
+4. **Synthesis Agent** → Enhances answer by merging:
+   - LLM-generated insights (Groq - Llama 3.3 70B)
+   - Real-time web search results (Tavily)
+5. **Validator Agent** → Quality assurance and confidence scoring (0-10)
+6. **End** → Returns structured response with answer, classification, and confidence
+
+### Agent Responsibilities
+
+| Agent | Domain | Example Questions |
+|-------|--------|------------------|
+| 🏢 **Business Agent** | Strategy, Finance, Operations, Marketing | "What is SWOT analysis?", "How to conduct market research?", "Explain startup funding" |
+| 🔬 **Research Agent** | Academic, Scientific, Theoretical | "Explain quantum computing", "What is the scientific method?", "Climate change research" |
+| 💻 **Technical Agent** | Programming, Engineering, System Design | "Write a Python sorting algorithm", "Explain REST APIs", "Design a microservice" |
+
+---
+
 ## Tech Stack
 
 ### Backend
@@ -50,8 +81,8 @@ The system orchestrates specialized **business**, **research**, and **technical*
 
 ### Frontend
 
-- **Framework**: Next.js (App Router, TypeScript)
-- **UI**: React, Tailwind CSS
+- **Framework**: Next.js 15+ (App Router, TypeScript)
+- **UI**: React 18, Tailwind CSS
 - **HTTP Client**: Axios + Fetch (for SSE)
 - **Icons & UI Enhancements**: `lucide-react`, `react-markdown`
 
@@ -63,40 +94,59 @@ The system orchestrates specialized **business**, **research**, and **technical*
 Langgraph-Project/
 ├── backend/
 │   ├── api/
-│   │   └── routes/
-│   │       └── agent.py        # FastAPI endpoints (ask, stream, history, state, status)
+│   │   ├── routes/
+│   │   │   └── agent.py        # FastAPI endpoints (ask, stream, history, state, status)
+│   │   └── middleware.py       # Logging, CORS, security headers
 │   ├── config/
-│   │   ├── settings.py         # Environment & config
+│   │   ├── settings.py         # Environment & configuration management
 │   │   └── prompts.py          # System prompts (supervisor, agents, synthesis, validator)
 │   ├── src/
 │   │   ├── agents/             # Business, research, technical agents
+│   │   │   ├── base_agent.py   # Base agent class
+│   │   │   ├── business_agent.py
+│   │   │   ├── research_agent.py
+│   │   │   └── technical_agent.py
 │   │   ├── synthesis/          # Synthesis agents & base class
-│   │   ├── validators/         # Validator agent
+│   │   │   ├── base_synthesis.py
+│   │   │   └── synthesis_agents.py
+│   │   ├── validators/         # Validator agent for quality assurance
+│   │   │   └── validator.py
 │   │   ├── routers/            # Supervisor & routing logic
-│   │   ├── utils/              # State, schemas, tools (Tavily)
+│   │   │   └── supervisor.py
+│   │   ├── utils/              # State, schemas, tools (Tavily search)
+│   │   │   ├── state.py        # LangGraph state definition
+│   │   │   ├── schemas.py      # Pydantic models
+│   │   │   └── tools.py        # External API integrations
 │   │   └── graph/
 │   │       └── workflow.py     # LangGraph StateGraph construction & memory
 │   ├── .env                    # Backend environment (not committed)
-│   ├── requirements.txt
+│   ├── requirements.txt        # Python dependencies
 │   └── main.py                 # FastAPI entrypoint
-└── frontend/
-    ├── src/
-    │   ├── app/
-    │   │   ├── page.tsx        # Main chat page
-    │   │   ├── layout.tsx
-    │   │   └── globals.css
-    │   ├── components/
-    │   │   ├── ChatInterface.tsx
-    │   │   ├── MessageList.tsx
-    │   │   └── InputForm.tsx (if used)
-    │   ├── services/
-    │   │   └── api.ts          # API client (ask, stream, history, state)
-    │   └── types/
-    │       └── index.ts        # Shared TypeScript types
-    ├── package.json
-    ├── tsconfig.json
-    ├── tailwind.config.js
-    └── .env.local              # Frontend environment (not committed)
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── page.tsx        # Main chat interface page
+│   │   │   ├── layout.tsx      # Root layout with metadata
+│   │   │   └── globals.css     # Global styles & Tailwind
+│   │   ├── components/
+│   │   │   ├── ChatInterface.tsx   # Main chat component
+│   │   │   ├── MessageList.tsx     # Message rendering with markdown
+│   │   │   └── InputForm.tsx       # User input form (if separated)
+│   │   ├── services/
+│   │   │   └── api.ts          # API client (ask, stream, history, state)
+│   │   └── types/
+│   │       └── index.ts        # Shared TypeScript interfaces
+│   ├── public/                 # Static assets
+│   ├── package.json            # Node.js dependencies
+│   ├── tsconfig.json           # TypeScript configuration
+│   ├── tailwind.config.js      # Tailwind CSS configuration
+│   ├── postcss.config.js       # PostCSS configuration
+│   ├── next.config.js          # Next.js configuration
+│   └── .env.local              # Frontend environment (not committed)
+├── workflow-diagram.png        # Architecture visualization
+├── .gitignore                  # Git ignore rules
+├── LICENSE                     # MIT License
+└── README.md                   # This file
 ```
 
 ---
@@ -106,21 +156,21 @@ Langgraph-Project/
 - **Python** 3.10+
 - **Node.js** 18+
 - **Git**
-- Accounts / API keys for:
-  - **Groq** (LLM)
-  - **Tavily** (search)
+- API keys for:
+  - [**Groq**](https://console.groq.com/) (LLM)
+  - [**Tavily**](https://tavily.com/) (Web search)
 
 ---
 
 ## Backend Setup (FastAPI + LangGraph)
 
-1. ### Navigate to backend
+### 1. Navigate to backend
 
 ```
 cd backend
 ```
 
-2. ### Create & activate virtual environment
+### 2. Create & activate virtual environment
 
 ```
 # Windows (PowerShell)
@@ -132,13 +182,13 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-3. ### Install dependencies
+### 3. Install dependencies
 
 ```
 pip install -r requirements.txt
 ```
 
-4. ### Configure environment variables
+### 4. Configure environment variables
 
 Create `.env` in `backend/`:
 
@@ -147,29 +197,30 @@ GROQ_API_KEY=your_groq_api_key_here
 TAVILY_API_KEY=your_tavily_api_key_here
 ```
 
-5. ### Run backend server
+### 5. Run backend server
 
 ```
 python main.py
 ```
 
-Backend will be available at:
+**Backend will be available at:**
 
-- API Root: `http://localhost:8000/`
-- Health: `http://localhost:8000/health`
-- Main Agent Endpoint: `POST http://localhost:8000/api/v1/ask`
+- 🌐 API Root: `http://localhost:8000/`
+- ✅ Health Check: `http://localhost:8000/health`
+- 🤖 Agent Endpoint: `POST http://localhost:8000/api/v1/ask`
+- 📚 API Docs: `http://localhost:8000/docs` (Swagger UI)
 
 ---
 
 ## Frontend Setup (Next.js)
 
-1. ### Navigate to frontend
+### 1. Navigate to frontend
 
 ```
 cd frontend
 ```
 
-2. ### Install dependencies
+### 2. Install dependencies
 
 ```
 npm install
@@ -177,7 +228,7 @@ npm install
 yarn install
 ```
 
-3. ### Configure frontend environment
+### 3. Configure frontend environment
 
 Create `.env.local` in `frontend/`:
 
@@ -185,7 +236,7 @@ Create `.env.local` in `frontend/`:
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-4. ### Run Next.js dev server
+### 4. Run Next.js dev server
 
 ```
 npm run dev
@@ -193,34 +244,33 @@ npm run dev
 yarn dev
 ```
 
-Frontend will be available at:
+**Frontend will be available at:**
 
-- `http://localhost:3000/`
+- 🖥️ Application: `http://localhost:3000/`
 
 ---
 
 ## How It Works
 
-### 1. Request Flow
+### Request Flow
 
-1. User enters a question in the Next.js UI.
-2. Frontend calls `POST /api/v1/ask` (or `/ask/stream` for streaming).
-3. FastAPI passes the question (and `thread_id`) into the LangGraph `AgentWorkflow`.
-4. LangGraph executes:
-   - **SupervisorAgent** → classify: business / research / technical.
-   - Corresponding **domain agent** generates a draft answer.
-   - **Synthesis agent** merges LLM answer with Tavily web search.
-   - **ValidatorAgent** scores the final answer (0–10).
-5. Final answer, classification, and confidence score return to frontend.
-6. UI displays formatted response, including type and confidence.
+1. **User Input** → User enters a question in the Next.js chat interface
+2. **API Call** → Frontend sends `POST /api/v1/ask` (or `/ask/stream` for streaming)
+3. **Workflow Execution** → FastAPI passes question + `thread_id` to LangGraph `AgentWorkflow`
+4. **Agent Pipeline**:
+   - **SupervisorAgent** → Classifies question (business / research / technical)
+   - **Domain Agent** → Generates specialized response based on classification
+   - **Synthesis Agent** → Merges LLM output with Tavily web search results
+   - **ValidatorAgent** → Scores answer quality and confidence (0–10)
+5. **Response** → Structured JSON returned with answer, classification, reasoning, and confidence
+6. **UI Update** → Frontend displays formatted response with metadata badges
 
-### 2. Memory & Threads
+### Memory & Conversation Threading
 
-- Each conversation uses a `thread_id` (stored in session storage on the frontend).
-- LangGraph’s checkpointer (MemorySaver) persists state between calls.
-- You can:
-  - Query history: `GET /api/v1/history/{thread_id}`
-  - Query current state: `GET /api/v1/state/{thread_id}`
+- Each conversation maintains context using a unique `thread_id` (stored in browser session storage)
+- **LangGraph MemorySaver** checkpointer persists state across multiple turns
+- **Conversation History**: Access via `GET /api/v1/history/{thread_id}`
+- **State Inspection**: Debug current state via `GET /api/v1/state/{thread_id}`
 
 ---
 
@@ -228,7 +278,7 @@ Frontend will be available at:
 
 ### `POST /api/v1/ask`
 
-Submit a question (non-streaming).
+Submit a question (non-streaming mode).
 
 **Request:**
 
@@ -245,10 +295,10 @@ Submit a question (non-streaming).
 ```
 {
   "question": "What is SWOT analysis, and how is it used in strategic planning?",
-  "answer": "…",
+  "answer": "SWOT analysis is a strategic planning framework used to evaluate...",
   "confidence_score": "9",
   "classifier": "business",
-  "reasoning": "…",
+  "reasoning": "The question relates to business strategy and management frameworks.",
   "timestamp": "2025-12-25T12:00:00Z",
   "thread_id": "thread-123-abc"
 }
@@ -256,105 +306,252 @@ Submit a question (non-streaming).
 
 ### `POST /api/v1/ask/stream`
 
-Same as `/ask`, but returns **Server-Sent Events (SSE)** for streaming partial updates.
+Submit a question with **Server-Sent Events (SSE)** streaming.
+
+Returns incremental updates as the workflow progresses through each agent node.
 
 ### `GET /api/v1/history/{thread_id}`
 
-Returns recent message history for a given thread.
+Retrieve conversation history for a specific thread.
+
+**Response:**
+
+```
+{
+  "thread_id": "thread-123-abc",
+  "messages": [
+    {
+      "question": "What is SWOT analysis?",
+      "answer": "...",
+      "classifier": "business",
+      "confidence": "9"
+    }
+  ],
+  "total_interactions": 5
+}
+```
 
 ### `GET /api/v1/state/{thread_id}`
 
-Returns the current LangGraph state snapshot for debugging/inspection.
+Get current LangGraph state snapshot for debugging.
 
 ### `GET /api/v1/status`
 
-Returns metadata about the service (available agents, features, model name).
+Service health and metadata.
+
+**Response:**
+
+```
+{
+  "status": "operational",
+  "model": "llama-3.3-70b-versatile",
+  "available_agents": ["business", "research", "technical"],
+  "features": {
+    "streaming": true,
+    "synthesis": true,
+    "validation": true,
+    "memory": true,
+    "checkpointer": "MemorySaver"
+  }
+}
+```
 
 ---
 
 ## Development Workflow
 
-### Recommended Steps
+### Backend Development
 
-- **Backend**
-  - Modify prompts in `backend/config/prompts.py`.
-  - Add/extend agents in `backend/src/agents/`.
-  - Adjust routing in `backend/src/routers/supervisor.py`.
-  - Modify graph logic in `backend/src/graph/workflow.py`.
+- **Modify Prompts**: Edit `backend/config/prompts.py` to tune agent behavior
+- **Add New Agents**: Extend `backend/src/agents/` with new specialized agents
+- **Adjust Routing**: Update `backend/src/routers/supervisor.py` for classification logic
+- **Graph Configuration**: Modify `backend/src/graph/workflow.py` for workflow changes
 
-- **Frontend**
-  - Edit UI in `frontend/src/app/page.tsx` and `frontend/src/components/`.
-  - Update API interaction in `frontend/src/services/api.ts`.
-  - Customize styling with Tailwind in `globals.css` and `tailwind.config.js`.
+### Frontend Development
+
+- **UI Components**: Edit `frontend/src/components/` for interface changes
+- **API Integration**: Update `frontend/src/services/api.ts` for new endpoints
+- **Styling**: Customize `frontend/src/app/globals.css` and `tailwind.config.js`
+- **Types**: Maintain `frontend/src/types/index.ts` for type safety
 
 ---
 
 ## Testing
 
-You can add tests under:
-
-- Backend: `backend/tests/`
-- Frontend: `frontend/__tests__/` or `frontend/src/__tests__/`
-
-Example backend test (pytest):
+### Backend Tests
 
 ```
 cd backend
-pytest
+pytest tests/
+# or
+python -m pytest tests/ -v
 ```
+
+### Frontend Tests
+
+```
+cd frontend
+npm run test
+# or
+yarn test
+```
+
+Create test files in:
+- Backend: `backend/tests/`
+- Frontend: `frontend/__tests__/` or `frontend/src/__tests__/`
 
 ---
 
 ## Deployment
 
-### Backend
+### Backend Deployment
 
-- Containerize with Docker or run via a process manager (e.g., systemd, PM2 for Node side).
-- Reverse proxy with Nginx or Caddy.
-- Ensure environment variables are set on the server (GROQ, Tavily).
+**Option 1: Docker**
 
-### Frontend
+```
+# Dockerfile (backend)
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
 
-- Build and deploy:
+**Option 2: Traditional Server**
+
+```
+# Install dependencies
+pip install -r requirements.txt
+
+# Run with production server
+gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+```
+
+### Frontend Deployment
+
+**Option 1: Vercel** (Recommended for Next.js)
+
+```
+npm install -g vercel
+vercel
+```
+
+**Option 2: Self-hosted**
 
 ```
 cd frontend
 npm run build
 npm run start
+# Or use PM2
+pm2 start npm --name "langgraph-frontend" -- start
 ```
 
-- Or deploy via platforms like Vercel, Netlify, or your own Node server.
+**Production Environment Variables:**
+
+```
+# Backend
+GROQ_API_KEY=your_production_key
+TAVILY_API_KEY=your_production_key
+
+# Frontend
+NEXT_PUBLIC_API_URL=https://api.yourdomain.com
+```
 
 ---
 
-## Roadmap Ideas
+## Roadmap & Future Enhancements
 
-- Add authentication and per-user thread segregation.
-- Plug in vector database (e.g., PostgreSQL + pgvector, Pinecone) for RAG.
-- Enhance UI with chat history list and multi-thread management.
-- Add more specialized agents (e.g., finance, legal, marketing).
-- Integrate analytics and logging for observability.
+- [ ] **Authentication** - JWT-based user authentication and authorization
+- [ ] **Vector Database RAG** - Integrate PostgreSQL + pgvector or Pinecor for document retrieval
+- [ ] **Multi-Thread UI** - Visual chat history sidebar with thread management
+- [ ] **Specialized Agents** - Add finance, legal, marketing, and healthcare agents
+- [ ] **Analytics Dashboard** - Usage metrics, agent performance tracking
+- [ ] **Voice Interface** - Speech-to-text input and text-to-speech output
+- [ ] **File Upload Support** - Document analysis and Q&A over uploaded files
+- [ ] **Collaborative Features** - Share conversations and multi-user sessions
+- [ ] **Model Flexibility** - Support for multiple LLM providers (OpenAI, Anthropic, etc.)
+- [ ] **Advanced Memory** - Long-term memory with semantic search
 
 ---
 
 ## Contributing
 
-1. Fork the repository.
-2. Create a new feature branch:
+We welcome contributions! Here's how to get started:
+
+1. **Fork** the repository
+2. **Create** a feature branch:
    ```
-   git checkout -b feature/new-agent
+   git checkout -b feature/add-new-agent
    ```
-3. Commit your changes with clear messages.
-4. Open a Pull Request describing:
-   - What you changed
-   - Why it’s useful
-   - How to test it
+3. **Make** your changes with clear, descriptive commits
+4. **Test** your changes thoroughly
+5. **Submit** a Pull Request with:
+   - Clear description of changes
+   - Why the change is beneficial
+   - How to test the new feature
+
+### Contribution Guidelines
+
+- Follow existing code style and structure
+- Add tests for new features
+- Update documentation as needed
+- Keep commits atomic and well-described
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Backend won't start:**
+- Check Python version: `python --version` (need 3.10+)
+- Verify API keys are set in `.env`
+- Check port 8000 is not in use: `netstat -ano | findstr :8000`
+
+**Frontend build errors:**
+- Clear cache: `rm -rf .next node_modules` then `npm install`
+- Check Node version: `node --version` (need 18+)
+- Verify `tsconfig.json` path aliases are correct
+
+**Memory not working:**
+- Ensure `thread_id` is being passed consistently
+- Check LangGraph checkpointer is initialized in `workflow.py`
 
 ---
 
 ## License
 
-This project is released under the **MIT License**.  
-You are free to use, modify, and distribute it with proper attribution.
+This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
+
+You are free to use, modify, and distribute this software with proper attribution.
 
 ---
+
+## Acknowledgments
+
+Built with:
+- [LangGraph](https://github.com/langchain-ai/langgraph) - Multi-agent orchestration framework
+- [FastAPI](https://fastapi.tiangolo.com/) - Modern Python web framework
+- [Next.js](https://nextjs.org/) - React framework for production
+- [Groq](https://groq.com/) - Fast LLM inference
+- [Tavily](https://tavily.com/) - AI-powered web search
+
+---
+
+## Contact & Support
+
+- **Repository**: [github.com/Lakshaygoel4321/Langgraph-Multiagent-Chat](https://github.com/Lakshaygoel4321/Langgraph-Multiagent-Chat)
+- **Issues**: [Report bugs or request features](https://github.com/Lakshaygoel4321/Langgraph-Multiagent-Chat/issues)
+- **Discussions**: [Join the conversation](https://github.com/Lakshaygoel4321/Langgraph-Multiagent-Chat/discussions)
+
+---
+
+<p align="center">
+  Made with ❤️ by developers, for developers
+</p>
+
+<p align="center">
+  <strong>⭐ Star this repo if you find it helpful!</strong>
+</p>
+```

@@ -358,29 +358,3 @@ This project is released under the **MIT License**.
 You are free to use, modify, and distribute it with proper attribution.
 
 ---
-
-## Contact
-
-For questions, suggestions, or collaboration:
-
-- GitHub: `https://github.com/<your-username>/Langgraph-Project`
-- Email: `<your-email-if-you-want>`
-
----
-
-> This repository is designed as a solid **template** for building real-world LangGraph-based multi-agent applications with a modern full-stack setup.
-```
-
-You can now:
-
-1. Save this content as `README.md` in your repo root.
-2. Replace placeholders like `<your-username>` or `<your-email-if-you-want>` if you want.
-3. Commit and push:
-
-```powershell
-git add README.md
-git commit -m "Add professional README"
-git push origin main
-```
-
-[1](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/107878637/42243ec3-005b-4c49-8599-8d2e449e4014/paste.txt)
